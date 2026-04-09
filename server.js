@@ -9,14 +9,15 @@ const connectDB = require('./config/db');
 
 const app = express();
 
-connectDB();
-
 const allowedOrigins = [
   'https://bydtest1.netlify.app',
   'http://localhost:3000',
-  'http://localhost:5173',
-  'http://localhost:4173',
+  'http://localhost:5173'
 ];
+
+
+
+
 
 app.use(cors({
   origin: function (origin, callback) {
