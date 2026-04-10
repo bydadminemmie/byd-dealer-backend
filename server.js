@@ -7,12 +7,15 @@ const cors = require('cors');
 const dealerRoutes = require('./routes/dealerRoutes');
 const connectDB = require('./config/db');
 
+const { adminJs, adminRouter } = require('./admin/adminSetup');
+
 const app = express();
 
 const allowedOrigins = [
   'https://bydtest1.netlify.app',
   'http://localhost:3000',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'http://localhost:5000'
 ];
 
 
@@ -34,6 +37,8 @@ app.use(cors({
 
 app.use(express.json());
 
+app.use(adminJs.options.rootPath, adminRouter);
+
 app.use('/api/dealers', dealerRoutes);
 
 app.get('/', (req, res) => {
@@ -49,7 +54,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong', error: err.message });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+connectDB().then(() => {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`🔐 Admin panel: http://localhost:${PORT}/admin`);
+  });
 });
