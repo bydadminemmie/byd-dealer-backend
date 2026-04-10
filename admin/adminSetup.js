@@ -3,17 +3,18 @@ const AdminJSExpress = require('@adminjs/express');
 const AdminJSMongoose = require('@adminjs/mongoose');
 const bcrypt = require('bcrypt');
 
+// ─── MODELS ─────────────────────────────────────────────
 const MembershipTier = require('../models/MembershipTier');
 const Membership     = require('../models/Membership');
 const Dealer         = require('../models/Dealer');
 const Vehicle        = require('../models/Vehicle');
 const EVClub         = require('../models/EVClub');
 const Country        = require('../models/Country');
+const Contact        = require('../models/Contact'); // ✅ ADDED
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
 const adminJs = new AdminJS({
-
   resources: [
 
     // ─── MEMBERSHIP TIERS ─────────────────────────────────────
@@ -37,6 +38,21 @@ const adminJs = new AdminJS({
         filterProperties: ['tier', 'paymentStatus', 'cryptoType'],
         editProperties: ['paymentStatus', 'adminNote'],
         showProperties: ['firstName', 'lastName', 'email', 'phone', 'country', 'tier', 'tierPrice', 'currency', 'cryptoType', 'transactionHash', 'paymentStatus', 'adminNote', 'approvedAt', 'createdAt'],
+      },
+    },
+
+    // ─── CONTACTS ─────────────────────────────────────────────
+    {
+      resource: Contact,
+      options: {
+        navigation: { name: 'Contacts', icon: 'MessageCircle' },
+        actions: {
+          new: { isAccessible: false },
+        },
+        listProperties: ['firstName', 'lastName', 'email', 'subject', 'status', 'createdAt'],
+        filterProperties: ['status'],
+        editProperties: ['status', 'adminNote'],
+        showProperties: ['firstName', 'lastName', 'email', 'phone', 'subject', 'message', 'status', 'adminNote', 'createdAt'],
       },
     },
 
@@ -140,7 +156,7 @@ const adminJs = new AdminJS({
   rootPath: '/admin',
 });
 
-// ─── Protected login router ────────────────────────────────────────────────
+// ─── Protected login router ─────────────────────────────
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   adminJs,
   {
@@ -151,6 +167,7 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
           process.env.ADMIN_PASSWORD_HASH
         );
         console.log('Password match result:', passwordMatch);
+
         if (passwordMatch) {
           return { email: process.env.ADMIN_EMAIL, role: 'admin' };
         }

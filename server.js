@@ -4,8 +4,9 @@ dotenv.config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dealerRoutes = require('./routes/dealerRoutes');
-const membershipRoutes = require('./routes/membershipRoutes'); // ← ADDED
+const dealerRoutes    = require('./routes/dealerRoutes');
+const membershipRoutes = require('./routes/membershipRoutes');
+const contactRoutes   = require('./routes/contactRoutes'); // ← ADDED
 const connectDB = require('./config/db');
 
 const { adminJs, adminRouter } = require('./admin/adminSetup');
@@ -38,7 +39,8 @@ app.use(express.json());
 app.use(adminJs.options.rootPath, adminRouter);
 
 app.use('/api/dealers', dealerRoutes);
-app.use('/api/membership', membershipRoutes); // ← ADDED
+app.use('/api/membership', membershipRoutes);
+app.use('/api/contact', contactRoutes); // ← ADDED
 
 app.get('/', (req, res) => {
   res.json({ message: '🚗 BYD Dealer API is running!' });
