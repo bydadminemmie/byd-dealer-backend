@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const Contact = require('../models/Contact');
+const contact = require('../models/Contact');
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
