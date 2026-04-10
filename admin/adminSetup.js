@@ -142,9 +142,10 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
     cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-    },
+  httpOnly: true,
+  secure: false,
+  sameSite: 'none',
+},
   }
 );
 
