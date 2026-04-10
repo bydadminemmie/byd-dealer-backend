@@ -120,11 +120,6 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   adminJs,
   {
     authenticate: async (email, password) => {
-      // Debug logs — remove these after login is working
-      console.log('Login attempt with email:', email);
-      console.log('Expected email:', process.env.ADMIN_EMAIL);
-      console.log('Hash exists:', !!process.env.ADMIN_PASSWORD_HASH);
-
       if (email === process.env.ADMIN_EMAIL) {
         const passwordMatch = await bcrypt.compare(
           password,
