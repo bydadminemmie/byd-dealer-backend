@@ -3,6 +3,8 @@ const router  = express.Router();
 const Contact = require('../models/Contact');
 const nodemailer = require('nodemailer');
 
+console.log("✅ Contact routes loaded"); // DEBUG
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -11,14 +13,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-router.post('/submit', async (req, res) => {
+// ✅ MAIN HANDLER (shared logic)
+async function handleContact(req, res) {
   try {
-    console.log("🔥 Incoming request body:", req.body); // ✅ DEBUG
+    console.log("🔥 Incoming request body:", req.body);
 
     const { firstName, lastName, email, phone, subject, message } = req.body;
 
     if (!firstName || !lastName || !email || !message) {
-      console.log("❌ Missing required fields"); // ✅ DEBUG
+      console.log("❌ Missing required fields");
       return res.status(400).json({ message: 'Please fill in all required fields.' });
     }
 
@@ -32,10 +35,9 @@ router.post('/submit', async (req, res) => {
     });
 
     await contact.save();
+    console.log("✅ Saved contact:", contact);
 
-    console.log("✅ Saved contact:", contact); // ✅ DEBUG
-
-    // Email notification to admin
+    // Email notification
     try {
       await transporter.sendMail({
         from: `"BYD Contact Form" <${process.env.GMAIL_USER}>`,
@@ -44,7 +46,7 @@ router.post('/submit', async (req, res) => {
         html: `<p>New contact message received</p>`
       });
 
-      console.log("📧 Email sent successfully"); // ✅ DEBUG
+      console.log("📧 Email sent successfully");
 
     } catch (emailErr) {
       console.error('❌ Email failed:', emailErr.message);
@@ -53,9 +55,13 @@ router.post('/submit', async (req, res) => {
     return res.status(201).json({ message: 'Message sent successfully!' });
 
   } catch (err) {
-    console.error('❌ Contact form error:', err); // ✅ DEBUG
+    console.error('❌ Contact form error:', err);
     return res.status(500).json({ message: 'Something went wrong. Please try again.' });
   }
-});
+}
+
+// ✅ SUPPORT BOTH ROUTES
+router.post('/', handleContact);
+router.post('/submit', handleContact);
 
 module.exports = router;
