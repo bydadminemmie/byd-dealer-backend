@@ -3,17 +3,42 @@ const AdminJSExpress = require('@adminjs/express');
 const AdminJSMongoose = require('@adminjs/mongoose');
 const bcrypt = require('bcrypt');
 
-// All four models
-const Dealer   = require('../models/Dealer');
-const Vehicle  = require('../models/Vehicle');
-const EVClub   = require('../models/EVClub');
-const Country  = require('../models/Country');
+const MembershipTier = require('../models/MembershipTier');
+const Membership     = require('../models/Membership');
+const Dealer         = require('../models/Dealer');
+const Vehicle        = require('../models/Vehicle');
+const EVClub         = require('../models/EVClub');
+const Country        = require('../models/Country');
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
 const adminJs = new AdminJS({
 
   resources: [
+
+    // ─── MEMBERSHIP TIERS ─────────────────────────────────────
+    {
+      resource: MembershipTier,
+      options: {
+        navigation: { name: 'Memberships', icon: 'CreditCard' },
+        listProperties: ['name', 'price', 'currency', 'isActive', 'sortOrder'],
+        editProperties: ['name', 'price', 'currency', 'color', 'benefits', 'isActive', 'sortOrder'],
+        showProperties: ['name', 'price', 'currency', 'color', 'benefits', 'isActive', 'sortOrder'],
+      },
+    },
+
+    // ─── MEMBERSHIP PAYMENTS ──────────────────────────────────
+    {
+      resource: Membership,
+      options: {
+        navigation: { name: 'Memberships', icon: 'CreditCard' },
+        actions: { new: { isAccessible: false } },
+        listProperties: ['firstName', 'lastName', 'email', 'tier', 'tierPrice', 'cryptoType', 'paymentStatus', 'createdAt'],
+        filterProperties: ['tier', 'paymentStatus', 'cryptoType'],
+        editProperties: ['paymentStatus', 'adminNote'],
+        showProperties: ['firstName', 'lastName', 'email', 'phone', 'country', 'tier', 'tierPrice', 'currency', 'cryptoType', 'transactionHash', 'paymentStatus', 'adminNote', 'approvedAt', 'createdAt'],
+      },
+    },
 
     // ─── DEALERS ──────────────────────────────────────────────
     {
@@ -138,14 +163,14 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   null,
   {
     resave: true,
-  saveUninitialized: true,
-  secret: process.env.SESSION_SECRET,
-  cookie: {
-    httpOnly: false,
-    secure: false,
-    sameSite: 'lax',
-    maxAge: 86400000, // 24 hours
-  },
+    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET,
+    cookie: {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 86400000,
+    },
   }
 );
 

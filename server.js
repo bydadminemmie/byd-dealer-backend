@@ -5,6 +5,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dealerRoutes = require('./routes/dealerRoutes');
+const membershipRoutes = require('./routes/membershipRoutes'); // ← ADDED
 const connectDB = require('./config/db');
 
 const { adminJs, adminRouter } = require('./admin/adminSetup');
@@ -16,11 +17,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:5000',
-  'https://emmie-backend.onrender.com' 
+  'https://emmie-backend.onrender.com'
 ];
-
-
-
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -40,6 +38,7 @@ app.use(express.json());
 app.use(adminJs.options.rootPath, adminRouter);
 
 app.use('/api/dealers', dealerRoutes);
+app.use('/api/membership', membershipRoutes); // ← ADDED
 
 app.get('/', (req, res) => {
   res.json({ message: '🚗 BYD Dealer API is running!' });
