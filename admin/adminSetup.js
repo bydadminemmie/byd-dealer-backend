@@ -142,14 +142,15 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   },
   null,
   {
-    resave: false,
-    saveUninitialized: false,
-    secret: process.env.SESSION_SECRET,
-    cookie: {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'none',
-    },
+    resave: true,
+  saveUninitialized: true,
+  secret: process.env.SESSION_SECRET,
+  cookie: {
+    httpOnly: false,
+    secure: false,
+    sameSite: 'lax',
+    maxAge: 86400000, // 24 hours
+  },
   }
 );
 
