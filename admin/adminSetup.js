@@ -67,8 +67,6 @@ const adminJs = new AdminJS({
       resource: EVClub,
       options: {
         navigation: { name: 'EV Club', icon: 'User' },
-        // Registrations come from the website — admins can view
-        // and delete but should not manually create or edit them
         actions: {
           new:  { isAccessible: false },
           edit: { isAccessible: false },
@@ -122,11 +120,17 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   adminJs,
   {
     authenticate: async (email, password) => {
+      // Debug logs — remove these after login is working
+      console.log('Login attempt with email:', email);
+      console.log('Expected email:', process.env.ADMIN_EMAIL);
+      console.log('Hash exists:', !!process.env.ADMIN_PASSWORD_HASH);
+
       if (email === process.env.ADMIN_EMAIL) {
         const passwordMatch = await bcrypt.compare(
           password,
           process.env.ADMIN_PASSWORD_HASH
         );
+        console.log('Password match result:', passwordMatch);
         if (passwordMatch) {
           return { email: process.env.ADMIN_EMAIL, role: 'admin' };
         }
@@ -142,10 +146,10 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
     cookie: {
-  httpOnly: true,
-  secure: false,
-  sameSite: 'none',
-},
+      httpOnly: true,
+      secure: false,
+      sameSite: 'none',
+    },
   }
 );
 
