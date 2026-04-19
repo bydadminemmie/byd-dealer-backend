@@ -15,6 +15,8 @@ const app = express();
 
 const allowedOrigins = [
   'https://bydtest1.netlify.app',
+  'https://bydcarsales.com',
+  'https://www.bydcarsales.com',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:5000',
