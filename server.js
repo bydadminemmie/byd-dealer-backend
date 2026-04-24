@@ -15,43 +15,45 @@ const { adminJs, adminRouter } = require('./admin/adminSetup');
 const app = express();
 
 // ======================
-// CORS Configuration - Fixed & Improved
+// CORS Configuration
 // ======================
 const allowedOrigins = [
   'https://bydtest1.netlify.app',
   'https://bydcarsales.com',
   'https://www.bydcarsales.com',
-  'https://byd-int-*.netlify.app',     // This covers random Netlify preview URLs
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:5000',
-  'http://127.0.0.1:5500',             // VS Code Live Server
+  'http://127.0.0.1:5500',
 ];
 
-// Better CORS setup for beginners
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
-      console.log(`CORS blocked origin: ${origin}`); // Helpful for debugging
+      console.log(`CORS blocked origin: ${origin}`);
       return callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT','DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,                    // Important if you use cookies later
-}));
+  credentials: true,
+};
+
+// ✅ Handle preflight for ALL routes including /admin
+app.options('*', cors(corsOptions));
+
+// ✅ Apply CORS globally
+app.use(cors(corsOptions));
 
 // ======================
 // Other Middleware
 // ======================
 app.use(express.json());
 
-// Admin panel
+// ✅ Admin panel (after CORS)
 app.use(adminJs.options.rootPath, adminRouter);
 
 // API Routes
@@ -83,5 +85,12 @@ connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`🔐 Admin panel: http://localhost:${PORT}/admin`);
+
+    // ── Keep Render awake (free tier spins down after inactivity) ──
+    setInterval(() => {
+      fetch('https://emmie-backend.onrender.com/')
+        .then(() => console.log('🏓 Keep-alive ping sent'))
+        .catch(() => {}); // Silent fail is fine
+    }, 4 * 60 * 1000); // Every 4 minutes
   });
 });

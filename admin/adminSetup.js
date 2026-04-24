@@ -10,9 +10,20 @@ const Dealer         = require('../models/Dealer');
 const Vehicle        = require('../models/Vehicle');
 const EVClub         = require('../models/EVClub');
 const Country        = require('../models/Country');
-const Contact        = require('../models/Contact'); // ✅ ADDED
+const Contact        = require('../models/Contact');
 
 AdminJS.registerAdapter(AdminJSMongoose);
+
+// ─── Allowed Origins ────────────────────────────────────
+const allowedOrigins = [
+  'https://bydtest1.netlify.app',
+  'https://bydcarsales.com',
+  'https://www.bydcarsales.com',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'http://127.0.0.1:5500',
+];
 
 const adminJs = new AdminJS({
   resources: [
@@ -184,11 +195,11 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     secret: process.env.SESSION_SECRET,
     cookie: {
       httpOnly: false,
-      secure: false,
-      sameSite: 'lax',
+      secure: true,          // ✅ CHANGED: must be true for HTTPS on Render
+      sameSite: 'none',      // ✅ CHANGED: required for cross-site cookies
       maxAge: 86400000,
     },
   }
 );
 
-module.exports = { adminJs, adminRouter };
+module.exports = { adminJs, adminRouter, allowedOrigins };
