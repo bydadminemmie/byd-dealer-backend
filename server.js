@@ -37,13 +37,10 @@ const corsOptions = {
       return callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT','DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
-
-// ✅ Handle preflight for ALL routes including /admin
-app.options('*', cors(corsOptions));
 
 // ✅ Apply CORS globally
 app.use(cors(corsOptions));
