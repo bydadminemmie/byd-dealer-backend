@@ -2,7 +2,8 @@ const AdminJS = require('adminjs');
 const AdminJSExpress = require('@adminjs/express');
 const AdminJSMongoose = require('@adminjs/mongoose');
 const bcrypt = require('bcrypt');
-const MongoStore = require('connect-mongo').default ?? require('connect-mongo');
+const session = require('express-session');
+const connectMongo = require('connect-mongo');
 
 // ─── MODELS ─────────────────────────────────────────────
 const MembershipTier = require('../models/MembershipTier');
@@ -168,11 +169,15 @@ const adminJs = new AdminJS({
   rootPath: '/admin',
 });
 
-// ✅ Create session store OUTSIDE of router (connect-mongo v6 correct syntax)
+// ✅ connect-mongo v4 correct syntax
+const MongoStore = connectMongo.create
+  ? connectMongo                          // v4+ uses .create()
+  : connectMongo(session);               // v3 uses factory pattern
+
 const sessionStore = MongoStore.create({
   mongoUrl: process.env.MONGO_URI,
   collectionName: 'adminSessions',
-  ttl: 86400, // 1 day in seconds
+  ttl: 86400,
 });
 
 // ─── Protected login router ─────────────────────────────
@@ -186,7 +191,6 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
           process.env.ADMIN_PASSWORD_HASH
         );
         console.log('Password match result:', passwordMatch);
-
         if (passwordMatch) {
           return { email: process.env.ADMIN_EMAIL, role: 'admin' };
         }
@@ -201,12 +205,12 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     resave: false,
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
-    store: sessionStore,        // ✅ MongoDB session store
+    store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: true,             // ✅ Required for HTTPS on Render
-      sameSite: 'none',         // ✅ Required for cross-site cookies
-      maxAge: 86400000,         // 1 day in ms
+      secure: true,        // ✅ HTTPS on Render
+      sameSite: 'none',    // ✅ Cross-site cookie support
+      maxAge: 86400000,    // 1 day
     },
   }
 );
