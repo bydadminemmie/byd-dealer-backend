@@ -2,7 +2,7 @@ const AdminJS = require('adminjs');
 const AdminJSExpress = require('@adminjs/express');
 const AdminJSMongoose = require('@adminjs/mongoose');
 const bcrypt = require('bcrypt');
-const MongoStore = require('connect-mongo');
+const MongoStore = require('connect-mongo').default ?? require('connect-mongo');
 
 // ─── MODELS ─────────────────────────────────────────────
 const MembershipTier = require('../models/MembershipTier');
