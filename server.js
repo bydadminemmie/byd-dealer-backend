@@ -10,6 +10,7 @@ const membershipRoutes = require('./routes/membershipRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 
 const connectDB = require('./config/db');
+const { adminJs, adminRouter } = require('./admin/adminSetup');
 
 const app = express();
 
@@ -57,6 +58,9 @@ app.use(cors(corsOptions));
 // ======================
 app.use(express.json());
 
+// ✅ Admin panel — hardcoded path to avoid rootPath resolution issues
+app.use('/admin', adminRouter);
+
 // API Routes
 app.use('/api/dealers', dealerRoutes);
 app.use('/api/membership', membershipRoutes);
@@ -87,23 +91,19 @@ app.use((err, req, res, next) => {
 });
 
 // ======================
-// Start Server — connect to MongoDB FIRST, then load AdminJS
+// Start Server
 // ======================
 connectDB().then(() => {
-  // ✅ AdminJS loaded AFTER MongoDB is connected to prevent buffering timeout
-  const { adminJs, adminRouter } = require('./admin/adminSetup');
-  app.use(adminJs.options.rootPath, adminRouter);
-
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
-    console.log(`🔐 Admin panel: http://localhost:${PORT}/admin`);
+    console.log(`🔐 Admin panel: https://emmie-backend.onrender.com/admin`);
 
-    // ── Keep Render awake (free tier spins down after inactivity) ──
+    // ── Keep Render awake ──
     setInterval(() => {
       fetch('https://emmie-backend.onrender.com/')
         .then(() => console.log('🏓 Keep-alive ping sent'))
-        .catch(() => {}); // Silent fail is fine
-    }, 4 * 60 * 1000); // Every 4 minutes
+        .catch(() => {});
+    }, 4 * 60 * 1000);
   });
 });

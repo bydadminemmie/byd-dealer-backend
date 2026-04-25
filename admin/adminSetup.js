@@ -2,7 +2,6 @@ const AdminJS = require('adminjs');
 const AdminJSExpress = require('@adminjs/express');
 const AdminJSMongoose = require('@adminjs/mongoose');
 const bcrypt = require('bcrypt');
-const session = require('express-session');
 const connectMongo = require('connect-mongo');
 
 // ─── MODELS ─────────────────────────────────────────────
@@ -25,6 +24,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
   'http://127.0.0.1:5500',
+  'https://emmie-backend.onrender.com',
 ];
 
 const adminJs = new AdminJS({
@@ -169,12 +169,8 @@ const adminJs = new AdminJS({
   rootPath: '/admin',
 });
 
-// ✅ connect-mongo v4 correct syntax
-const MongoStore = connectMongo.create
-  ? connectMongo                          // v4+ uses .create()
-  : connectMongo(session);               // v3 uses factory pattern
-
-const sessionStore = MongoStore.create({
+// ✅ connect-mongo v4 session store
+const sessionStore = connectMongo.create({
   mongoUrl: process.env.MONGO_URI,
   collectionName: 'adminSessions',
   ttl: 86400,
@@ -207,11 +203,11 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
     cookie: {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production', // ✅ Auto-detect
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  maxAge: 86400000,
-}, 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 86400000,
+    },
   }
 );
 
