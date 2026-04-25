@@ -207,11 +207,11 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
     cookie: {
-      httpOnly: true,
-      secure: true,        // ✅ HTTPS on Render
-      sameSite: 'none',    // ✅ Cross-site cookie support
-      maxAge: 86400000,    // 1 day
-    },
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production', // ✅ Auto-detect
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 86400000,
+}, 
   }
 );
 

@@ -14,6 +14,8 @@ const { adminJs, adminRouter } = require('./admin/adminSetup');
 
 const app = express();
 
+// ✅ Required for secure cookies behind Render's proxy
+app.set('trust proxy', 1);
 // ======================
 // CORS Configuration
 // ======================
