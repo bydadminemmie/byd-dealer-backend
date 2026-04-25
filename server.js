@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 
 const dealerRoutes = require('./routes/dealerRoutes');
@@ -10,7 +9,6 @@ const membershipRoutes = require('./routes/membershipRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 
 const connectDB = require('./config/db');
-const { adminJs, adminRouter } = require('./admin/adminSetup');
 
 const app = express();
 
@@ -50,16 +48,8 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 
-// ✅ Apply CORS globally
 app.use(cors(corsOptions));
-
-// ======================
-// Other Middleware
-// ======================
 app.use(express.json());
-
-// ✅ Admin panel — hardcoded path to avoid rootPath resolution issues
-app.use('/admin', adminRouter);
 
 // API Routes
 app.use('/api/dealers', dealerRoutes);
@@ -69,11 +59,6 @@ app.use('/api/contact', contactRoutes);
 // Home route
 app.get('/', (req, res) => {
   res.json({ message: '🚗 BYD Dealer API is running!' });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
 });
 
 // ======================
@@ -91,9 +76,20 @@ app.use((err, req, res, next) => {
 });
 
 // ======================
-// Start Server
+// ✅ Connect to DB first, then setup Admin and start server
 // ======================
 connectDB().then(() => {
+  // ✅ Import admin AFTER DB is connected to avoid buffering timeout
+  const { adminJs, adminRouter } = require('./admin/adminSetup');
+
+  // ✅ Mount admin panel
+  app.use('/admin', adminRouter);
+
+  // 404 handler (must be after admin is mounted)
+  app.use((req, res) => {
+    res.status(404).json({ message: 'Route not found' });
+  });
+
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
@@ -106,4 +102,7 @@ connectDB().then(() => {
         .catch(() => {});
     }, 4 * 60 * 1000);
   });
+}).catch((err) => {
+  console.error('❌ Failed to connect to MongoDB:', err);
+  process.exit(1);
 });
