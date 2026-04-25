@@ -10,12 +10,14 @@ const membershipRoutes = require('./routes/membershipRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 
 const connectDB = require('./config/db');
-const { adminJs, adminRouter } = require('./admin/adminSetup');
 
 const app = express();
 
-// ✅ Required for secure cookies behind Render's proxy
+// ======================
+// ✅ Trust Render's reverse proxy (required for secure cookies)
+// ======================
 app.set('trust proxy', 1);
+
 // ======================
 // CORS Configuration
 // ======================
@@ -32,7 +34,6 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, server-to-server)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
@@ -42,22 +43,19 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type','Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
-  preflightContinue: false,  // ✅ Let cors() handle OPTIONS automatically
-  optionsSuccessStatus: 204, // ✅ Respond 204 to preflight requests
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 };
 
-// ✅ Apply CORS globally (handles preflight automatically — no app.options() needed)
+// ✅ Apply CORS globally
 app.use(cors(corsOptions));
 
 // ======================
 // Other Middleware
 // ======================
 app.use(express.json());
-
-// ✅ Admin panel (after CORS)
-app.use(adminJs.options.rootPath, adminRouter);
 
 // API Routes
 app.use('/api/dealers', dealerRoutes);
@@ -76,7 +74,6 @@ app.use((req, res) => {
 
 // ======================
 // Error handler
-// ✅ Distinguishes CORS errors from general errors
 // ======================
 app.use((err, req, res, next) => {
   if (err.message === 'Not allowed by CORS') {
@@ -90,9 +87,13 @@ app.use((err, req, res, next) => {
 });
 
 // ======================
-// Start Server
+// Start Server — connect to MongoDB FIRST, then load AdminJS
 // ======================
 connectDB().then(() => {
+  // ✅ AdminJS loaded AFTER MongoDB is connected to prevent buffering timeout
+  const { adminJs, adminRouter } = require('./admin/adminSetup');
+  app.use(adminJs.options.rootPath, adminRouter);
+
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
