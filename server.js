@@ -25,7 +25,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
   'http://127.0.0.1:5500',
-  'https://emmie-backend.onrender.com', // ✅ Added your Render backend
+  'https://emmie-backend.onrender.com',
 ];
 
 const corsOptions = {
@@ -40,16 +40,14 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type','Authorization', 'X-Requested-With'],
   credentials: true,
+  preflightContinue: false,  // ✅ Let cors() handle OPTIONS automatically
+  optionsSuccessStatus: 204, // ✅ Respond 204 to preflight requests
 };
 
-// ✅ Apply CORS globally
+// ✅ Apply CORS globally (handles preflight automatically — no app.options() needed)
 app.use(cors(corsOptions));
-
-// ✅ Handle preflight OPTIONS requests for all routes
-// ✅ Replace with this
-app.options('/(.*)', cors(corsOptions));
 
 // ======================
 // Other Middleware
@@ -76,7 +74,7 @@ app.use((req, res) => {
 
 // ======================
 // Error handler
-// ✅ Now distinguishes CORS errors from general errors
+// ✅ Distinguishes CORS errors from general errors
 // ======================
 app.use((err, req, res, next) => {
   if (err.message === 'Not allowed by CORS') {
