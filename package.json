@@ -17,6 +17,7 @@
     "@adminjs/mongoose": "^3.0.1",
     "adminjs": "^6.8.7",
     "bcrypt": "^6.0.0",
+    "connect-mongo": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",
     "express": "^5.2.1",

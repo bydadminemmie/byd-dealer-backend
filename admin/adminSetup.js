@@ -2,6 +2,7 @@ const AdminJS = require('adminjs');
 const AdminJSExpress = require('@adminjs/express');
 const AdminJSMongoose = require('@adminjs/mongoose');
 const bcrypt = require('bcrypt');
+const MongoStore = require('connect-mongo');
 
 // ─── MODELS ─────────────────────────────────────────────
 const MembershipTier = require('../models/MembershipTier');
@@ -190,14 +191,20 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   },
   null,
   {
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
+    // ✅ MongoDB session store — persists sessions across Render restarts
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: 'adminSessions',
+      ttl: 86400, // 1 day in seconds
+    }),
     cookie: {
-      httpOnly: false,
-      secure: true,          // ✅ CHANGED: must be true for HTTPS on Render
-      sameSite: 'none',      // ✅ CHANGED: required for cross-site cookies
-      maxAge: 86400000,
+      httpOnly: true,        // ✅ More secure
+      secure: true,          // ✅ Required for HTTPS on Render
+      sameSite: 'none',      // ✅ Required for cross-site cookies
+      maxAge: 86400000,      // 1 day in ms
     },
   }
 );
