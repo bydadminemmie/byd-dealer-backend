@@ -18,6 +18,7 @@ AdminJS.registerAdapter(AdminJSMongoose);
 // ─── Allowed Origins ────────────────────────────────────
 const allowedOrigins = [
   'https://bydtest1.netlify.app',
+  'https://byd-int.onrender.com',
   'https://bydcarsales.com',
   'https://www.bydcarsales.com',
   'http://localhost:3000',

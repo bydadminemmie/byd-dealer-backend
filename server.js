@@ -21,7 +21,8 @@ app.set('trust proxy', 1);
 // CORS Configuration
 // ======================
 const allowedOrigins = [
-  'https://bydtest1.netlify.app',
+   'https://bydtest1.netlify.app',
+  'https://byd-int.onrender.com',
   'https://bydcarsales.com',
   'https://www.bydcarsales.com',
   'http://localhost:3000',
