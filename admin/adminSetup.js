@@ -168,6 +168,13 @@ const adminJs = new AdminJS({
   rootPath: '/admin',
 });
 
+// ✅ Create session store OUTSIDE of router (connect-mongo v6 correct syntax)
+const sessionStore = MongoStore.create({
+  mongoUrl: process.env.MONGO_URI,
+  collectionName: 'adminSessions',
+  ttl: 86400, // 1 day in seconds
+});
+
 // ─── Protected login router ─────────────────────────────
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   adminJs,
@@ -194,17 +201,12 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     resave: false,
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
-    // ✅ MongoDB session store — persists sessions across Render restarts
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI,
-      collectionName: 'adminSessions',
-      ttl: 86400, // 1 day in seconds
-    }),
+    store: sessionStore,        // ✅ MongoDB session store
     cookie: {
-      httpOnly: true,        // ✅ More secure
-      secure: true,          // ✅ Required for HTTPS on Render
-      sameSite: 'none',      // ✅ Required for cross-site cookies
-      maxAge: 86400000,      // 1 day in ms
+      httpOnly: true,
+      secure: true,             // ✅ Required for HTTPS on Render
+      sameSite: 'none',         // ✅ Required for cross-site cookies
+      maxAge: 86400000,         // 1 day in ms
     },
   }
 );
